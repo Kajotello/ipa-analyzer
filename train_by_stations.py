@@ -62,7 +62,8 @@ def extract_schedule_data(schedule, result_data_series):
             station['station_name'].replace('Wlkp.', 'Wielkopolskie')
                                    .replace(' WP2', '')
                                    .replace(' Osobowy', '')
-                                   .replace('k. ', 'k/'):
+                                   .replace('k. ', 'koło ')
+                                   .replace('k/', 'koło '):
             station[attribute] for station in schedule['info']}
         result_data_series[attribute][schedule['schedule_date']] = pd.Series(schedule_data)
 

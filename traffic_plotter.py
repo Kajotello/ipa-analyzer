@@ -71,7 +71,7 @@ def plot_posts(line_data, selected_date_begin):
 
 
 def main():
-    plot_traffic_graph('213', '2020-08-08', True)
+    plot_traffic_graph('9', '2020-08-08', True)
     plt.show()
 
 
