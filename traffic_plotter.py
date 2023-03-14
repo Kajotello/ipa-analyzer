@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import train_by_stations as tbs
 import railway_line_data as rld
 import consts
+from collections import defaultdict
 
 
 def plot_traffic_graph(line_number, date, is_with_delay):
@@ -31,33 +32,33 @@ def plot_traffic_graph(line_number, date, is_with_delay):
 
 
 def prepare_data(trains_full_data, line_data, date):
-    scheduled_time_point_dict = dict()
-    real_time_point_dict = dict()
+    scheduled_time_point_dict = defaultdict(list)
+    real_time_point_dict = defaultdict(list)
 
     for train_name in trains_full_data.keys():
         train = trains_full_data[train_name]
+        # TODO rewrite to check this condition only once
         if date in train[consts.ATTRIBUTES[0]].columns:
-            scheduled_time_point_dict[train_name] = list()
-            real_time_point_dict[train_name] = list()
-            for schedule_attribute, delay_attribute in zip(consts.ATTRIBUTES[0::2], consts.ATTRIBUTES[1::2]):
-                train_time_points = [*zip(train[schedule_attribute][date], train[delay_attribute][date],
-                                          train[schedule_attribute].index)]
-                train_sch_time_points = [(datetime.fromisoformat(train_tp[0]), line_data.get(train_tp[2])[0])
-                                         for train_tp in train_time_points
-                                         if line_data.get(train_tp[2]) and
-                                         train_tp[0] and train_tp[0] == train_tp[0]]
-                scheduled_time_point_dict[train_name] += train_sch_time_points
-                train_real_time_points = [(datetime.fromisoformat(train_tp[0]) + timedelta(minutes=train_tp[1]),
-                                           line_data.get(train_tp[2])[0])
-                                          for train_tp in train_time_points
-                                          if line_data.get(train_tp[2]) and
-                                          train_tp[0] and train_tp[0] == train_tp[0]]
-                real_time_point_dict[train_name] += (train_real_time_points)
-
-            scheduled_time_point_dict[train_name] = sorted(scheduled_time_point_dict[train_name])
-            real_time_point_dict[train_name] = sorted(real_time_point_dict[train_name])
+            scheduled_time_point_dict[train_name] = get_time_position_points(train, line_data, date, 'schedule')
+            real_time_point_dict[train_name] = get_time_position_points(train, line_data, date, 'real')
 
     return (scheduled_time_point_dict, real_time_point_dict)
+
+
+def get_time_position_points(train_data, line_data, date, type='schedule'):
+    train_time_position_points = list()
+    if date in train_data[consts.ATTRIBUTES[0]].columns:
+        for schedule_attribute, delay_attribute in zip(consts.ATTRIBUTES[0::2], consts.ATTRIBUTES[1::2]):
+            train_time_points = [*zip(train_data[schedule_attribute][date], train_data[delay_attribute][date],
+                                      train_data[schedule_attribute].index)]
+            train_time_position_points += [(datetime.fromisoformat(train_tp[0]), line_data.get(train_tp[2])[0]) if type=='schedule'
+                                           else (datetime.fromisoformat(train_tp[0])+timedelta(minutes=train_tp[1]), line_data.get(train_tp[2])[0])
+                                           for train_tp in train_time_points
+                                           if line_data.get(train_tp[2]) and
+                                           train_tp[0] and train_tp[0] == train_tp[0]]
+        return sorted(train_time_position_points)
+    else:
+        return None
 
 
 def plot_posts(line_data, selected_date_begin):
@@ -71,7 +72,7 @@ def plot_posts(line_data, selected_date_begin):
 
 
 def main():
-    plot_traffic_graph('9', '2020-08-08', True)
+    plot_traffic_graph('354', '2020-11-11', False)
     plt.show()
 
 

@@ -144,130 +144,130 @@ def get_line_speed_data(line_number):
 #     speed_data = get_line_speed_data(line_number)
 
 
-post_data = get_posts_on_line_2('202')
-post_df = get_line_data('202')
-speed_df = get_line_speed_data('202')
-curr_post = post_data[0]
-is_previous_two_tracks = False
-for post1, post2 in zip(post_data, post_data[1:]):
-    post1.next_post = post2
-    post2.prev_post = post1
-    sections_between_posts = speed_df.loc[(speed_df['Km końca'] >= post1.position) & (speed_df['Km pocz. '] <= post2.position)]
-    section_speed_data = list()
-    if 'P' in sections_between_posts['Tor'].values:
-        n_of_tracks = 1
-        if ((post1.type not in ['ST', 'PODG'] and not is_previous_two_tracks) or
-            (post1.type in ['ST', 'PODG'] and (min(sections_between_posts.loc[sections_between_posts['Tor'] == 'P', 'Km końca'].max(), post2.position)-post1.position)/(post2.position-post1.position) < 0.15) or
-              (post2.type in ['ST', 'PODG'] and (post2.position - max(sections_between_posts.loc[sections_between_posts['Tor'] == 'P', 'Km pocz. '].min(), post1.position))/(post2.position-post1.position) < 0.15)):
-            is_previous_two_tracks = False
-            sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
-            sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
-            odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
-            odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
-            sections_breaking_points = set()
-            previous_max_spped = None
-            for section in sorted(list(odd_direction_sections.values())):
-                if previous_max_spped and section[2] == previous_max_spped:
-                    sections_breaking_points.remove(section[0])
-                    sections_breaking_points.add(section[1])
-                else:
-                    sections_breaking_points.add(section[0])
-                    sections_breaking_points.add(section[1])
-                    previous_max_spped = section[2]
-            sections_breaking_points = sorted(sections_breaking_points)
-            for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
-                max_speed_odd = odd_direction_sections[section_begin][2]
-                line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd)
-                section_speed_data.append(line_segment)
-        else:
-            n_of_tracks = 2
-            is_previous_two_tracks = True
-            if sections_between_posts.loc[sections_between_posts['Tor'] == 'N', "Km pocz. "].min() > post1.position:
-                value_to_replace = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', "Km pocz. "].min()
-                sections_between_posts.loc[(sections_between_posts['Tor'] == 'N') &(sections_between_posts['Km pocz. '] == value_to_replace), 'Km pocz. '] = post1.position
+# post_data = get_posts_on_line_2('202')
+# post_df = get_line_data('202')
+# speed_df = get_line_speed_data('202')
+# curr_post = post_data[0]
+# is_previous_two_tracks = False
+# for post1, post2 in zip(post_data, post_data[1:]):
+#     post1.next_post = post2
+#     post2.prev_post = post1
+#     sections_between_posts = speed_df.loc[(speed_df['Km końca'] >= post1.position) & (speed_df['Km pocz. '] <= post2.position)]
+#     section_speed_data = list()
+#     if 'P' in sections_between_posts['Tor'].values:
+#         n_of_tracks = 1
+#         if ((post1.type not in ['ST', 'PODG'] and not is_previous_two_tracks) or
+#             (post1.type in ['ST', 'PODG'] and (min(sections_between_posts.loc[sections_between_posts['Tor'] == 'P', 'Km końca'].max(), post2.position)-post1.position)/(post2.position-post1.position) < 0.15) or
+#               (post2.type in ['ST', 'PODG'] and (post2.position - max(sections_between_posts.loc[sections_between_posts['Tor'] == 'P', 'Km pocz. '].min(), post1.position))/(post2.position-post1.position) < 0.15)):
+#             is_previous_two_tracks = False
+#             sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
+#             sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
+#             odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
+#             odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
+#             sections_breaking_points = set()
+#             previous_max_spped = None
+#             for section in sorted(list(odd_direction_sections.values())):
+#                 if previous_max_spped and section[2] == previous_max_spped:
+#                     sections_breaking_points.remove(section[0])
+#                     sections_breaking_points.add(section[1])
+#                 else:
+#                     sections_breaking_points.add(section[0])
+#                     sections_breaking_points.add(section[1])
+#                     previous_max_spped = section[2]
+#             sections_breaking_points = sorted(sections_breaking_points)
+#             for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
+#                 max_speed_odd = odd_direction_sections[section_begin][2]
+#                 line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd)
+#                 section_speed_data.append(line_segment)
+#         else:
+#             n_of_tracks = 2
+#             is_previous_two_tracks = True
+#             if sections_between_posts.loc[sections_between_posts['Tor'] == 'N', "Km pocz. "].min() > post1.position:
+#                 value_to_replace = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', "Km pocz. "].min()
+#                 sections_between_posts.loc[(sections_between_posts['Tor'] == 'N') &(sections_between_posts['Km pocz. '] == value_to_replace), 'Km pocz. '] = post1.position
 
-            if sections_between_posts.loc[sections_between_posts['Tor'] == 'P', "Km pocz. "].min() > post1.position:
-                value_to_replace = sections_between_posts.loc[sections_between_posts['Tor'] == 'P', "Km pocz. "].min()
-                sections_between_posts.loc[(sections_between_posts['Tor'] == 'P') &(sections_between_posts['Km pocz. '] == value_to_replace), 'Km pocz. '] = post1.position
+#             if sections_between_posts.loc[sections_between_posts['Tor'] == 'P', "Km pocz. "].min() > post1.position:
+#                 value_to_replace = sections_between_posts.loc[sections_between_posts['Tor'] == 'P', "Km pocz. "].min()
+#                 sections_between_posts.loc[(sections_between_posts['Tor'] == 'P') &(sections_between_posts['Km pocz. '] == value_to_replace), 'Km pocz. '] = post1.position
 
-            if sections_between_posts["Km końca"].max() < post2.position:
-                sections_between_posts.loc[sections_between_posts["Km końca"].max(), 'Km końca'] = post2.position
+#             if sections_between_posts["Km końca"].max() < post2.position:
+#                 sections_between_posts.loc[sections_between_posts["Km końca"].max(), 'Km końca'] = post2.position
 
-            sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
-            sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
-            odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
-            odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
-            even_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'P', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
-            even_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in even_direction_sections}
-            print(odd_direction_sections, even_direction_sections)
-            sections_breaking_points_1 = set()
-            sections_breaking_points_2 = set()
-            previous_max_spped = None
-            for section in sorted(list(odd_direction_sections.values())):
-                if previous_max_spped and section[2] == previous_max_spped:
-                    if section[1] in sections_breaking_points_1:
-                        sections_breaking_points_1.remove(section[0])
-                    sections_breaking_points_1.add(section[1])
-                else:
-                    sections_breaking_points_1.add(section[0])
-                    sections_breaking_points_1.add(section[1])
-                    previous_max_spped = section[2]
-            previous_max_spped = None
-            for section in sorted(list(even_direction_sections.values())):
-                if previous_max_spped and section[2] == previous_max_spped:
-                    if section[0] in sections_breaking_points_2:
-                        sections_breaking_points_2.remove(section[0])
-                    sections_breaking_points_2.add(section[1])
-                else:
-                    sections_breaking_points_2.add(section[0])
-                    sections_breaking_points_2.add(section[1])
-                    previous_max_spped = section[2]
-            print(sections_breaking_points_1, sections_breaking_points_2)
-            sections_breaking_points = sections_breaking_points_1.union(sections_breaking_points_2)
-            sections_breaking_points = sorted(sections_breaking_points)
-            previous_max_spped_odd = None
-            previous_max_spped_even = None
-            for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
-                max_speed_odd = odd_direction_sections.get(section_begin, ('','',previous_max_spped_odd))[2]    # tuple to chnage - really ugly
-                max_speed_even = even_direction_sections.get(section_begin, ('','',previous_max_spped_even))[2]
-                line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd, max_speed_even)
-                section_speed_data.append(line_segment)
-                previous_max_spped_odd = max_speed_odd
-                previous_max_spped_even = max_speed_even
-    else:
-        n_of_tracks = 1
-        is_previous_two_tracks = False
-        sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
-        sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
-        odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
-        odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
-        sections_breaking_points = set()
-        previous_max_spped = None
-        for section in sorted(list(odd_direction_sections.values())):
-            if previous_max_spped and section[2] == previous_max_spped:
-                sections_breaking_points.remove(section[0])
-                sections_breaking_points.add(section[1])
-            else:
-                sections_breaking_points.add(section[0])
-                sections_breaking_points.add(section[1])
-                previous_max_spped = section[2]
-        sections_breaking_points = sorted(sections_breaking_points)
-        for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
-            max_speed_odd = odd_direction_sections[section_begin][2]
-            line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd)
-            section_speed_data.append(line_segment)
-    line_section = LineSection(n_of_tracks, section_speed_data)
-    post1._next_section = line_section
-    post2._prev_section = line_section
+#             sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
+#             sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
+#             odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
+#             odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
+#             even_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'P', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
+#             even_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in even_direction_sections}
+#             print(odd_direction_sections, even_direction_sections)
+#             sections_breaking_points_1 = set()
+#             sections_breaking_points_2 = set()
+#             previous_max_spped = None
+#             for section in sorted(list(odd_direction_sections.values())):
+#                 if previous_max_spped and section[2] == previous_max_spped:
+#                     if section[1] in sections_breaking_points_1:
+#                         sections_breaking_points_1.remove(section[0])
+#                     sections_breaking_points_1.add(section[1])
+#                 else:
+#                     sections_breaking_points_1.add(section[0])
+#                     sections_breaking_points_1.add(section[1])
+#                     previous_max_spped = section[2]
+#             previous_max_spped = None
+#             for section in sorted(list(even_direction_sections.values())):
+#                 if previous_max_spped and section[2] == previous_max_spped:
+#                     if section[0] in sections_breaking_points_2:
+#                         sections_breaking_points_2.remove(section[0])
+#                     sections_breaking_points_2.add(section[1])
+#                 else:
+#                     sections_breaking_points_2.add(section[0])
+#                     sections_breaking_points_2.add(section[1])
+#                     previous_max_spped = section[2]
+#             print(sections_breaking_points_1, sections_breaking_points_2)
+#             sections_breaking_points = sections_breaking_points_1.union(sections_breaking_points_2)
+#             sections_breaking_points = sorted(sections_breaking_points)
+#             previous_max_spped_odd = None
+#             previous_max_spped_even = None
+#             for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
+#                 max_speed_odd = odd_direction_sections.get(section_begin, ('','',previous_max_spped_odd))[2]    # tuple to chnage - really ugly
+#                 max_speed_even = even_direction_sections.get(section_begin, ('','',previous_max_spped_even))[2]
+#                 line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd, max_speed_even)
+#                 section_speed_data.append(line_segment)
+#                 previous_max_spped_odd = max_speed_odd
+#                 previous_max_spped_even = max_speed_even
+#     else:
+#         n_of_tracks = 1
+#         is_previous_two_tracks = False
+#         sections_between_posts.loc[sections_between_posts["Km pocz. "] < post1.position, 'Km pocz. '] = post1.position
+#         sections_between_posts.loc[sections_between_posts["Km końca"] > post2.position, 'Km końca'] = post2.position
+#         odd_direction_sections = sections_between_posts.loc[sections_between_posts['Tor'] == 'N', ['Km pocz. ', 'Km końca', 'Maks. prędkość [km/h]']].sort_values('Km pocz. ').to_dict(orient='records')
+#         odd_direction_sections = {section['Km pocz. ']: tuple(section.values()) for section in odd_direction_sections}
+#         sections_breaking_points = set()
+#         previous_max_spped = None
+#         for section in sorted(list(odd_direction_sections.values())):
+#             if previous_max_spped and section[2] == previous_max_spped:
+#                 sections_breaking_points.remove(section[0])
+#                 sections_breaking_points.add(section[1])
+#             else:
+#                 sections_breaking_points.add(section[0])
+#                 sections_breaking_points.add(section[1])
+#                 previous_max_spped = section[2]
+#         sections_breaking_points = sorted(sections_breaking_points)
+#         for section_begin, section_end in zip(sections_breaking_points, sections_breaking_points[1:]):
+#             max_speed_odd = odd_direction_sections[section_begin][2]
+#             line_segment = LineSpeedSegment(section_begin, section_end, max_speed_odd)
+#             section_speed_data.append(line_segment)
+#     line_section = LineSection(n_of_tracks, section_speed_data)
+#     post1._next_section = line_section
+#     post2._prev_section = line_section
 
 
-while(curr_post):
-    print(curr_post)
-    if curr_post._next_section:
-        print(f'Liczna torów: {curr_post._next_section.n_of_tracks}')
-        for segment in curr_post._next_section._speed_data:
-            print(segment)
-    print('\n')
-    curr_post = curr_post.next_post
+# while(curr_post):
+#     print(curr_post)
+#     if curr_post._next_section:
+#         print(f'Liczna torów: {curr_post._next_section.n_of_tracks}')
+#         for segment in curr_post._next_section._speed_data:
+#             print(segment)
+#     print('\n')
+#     curr_post = curr_post.next_post
 
 
