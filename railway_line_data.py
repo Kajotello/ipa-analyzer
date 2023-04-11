@@ -108,7 +108,7 @@ def get_all_lines_data(filename):
 
 
 def get_posts_on_line(line_number):
-    all_lines_df = get_all_lines_data('posts.xlsx')
+    all_lines_df = get_all_lines_data('data/posts.xlsx')
     selected_line_df = all_lines_df.loc[all_lines_df['Nr linii'] == line_number]
 
     # to change in future, not exactly correct
@@ -117,9 +117,22 @@ def get_posts_on_line(line_number):
 
 
 def get_line_data(line_number):
-    all_lines_df = get_all_lines_data('posts.xlsx')
+    all_lines_df = get_all_lines_data('data/posts.xlsx')
     selected_line_df = all_lines_df.loc[all_lines_df['Nr linii'] == line_number]
     return selected_line_df.sort_values('Km osi')
+
+
+def get_line_stations_name(line_number):
+    all_lines_df = get_all_lines_data('data/posts.xlsx')
+    selected_line_df = all_lines_df.loc[all_lines_df['Nr linii'] == line_number]
+    return selected_line_df['Nazwa punktu'].to_numpy()
+
+
+def get_stations_data_by_name(station_list, all_lines_df=None):
+    # if stations is on many lines this function will list it only once (random one)
+    if all_lines_df is None:
+        all_lines_df = get_all_lines_data('data/posts.xlsx')
+    return all_lines_df[all_lines_df['Nazwa punktu'].isin(station_list)].drop_duplicates(['Nazwa punktu'])
 
 
 def get_posts_on_line_2(line_number):
@@ -134,7 +147,7 @@ def get_full_speed_data(filename):
 
 
 def get_line_speed_data(line_number):
-    line_speed_df = get_full_speed_data('line_speed.xlsx')
+    line_speed_df = get_full_speed_data('data/line_speed.xlsx')
     line_speed_df['Nr linii'] = line_speed_df['Nr linii'].str.strip()
     selected_line_df = line_speed_df.loc[line_speed_df['Nr linii'] == line_number]
     return selected_line_df

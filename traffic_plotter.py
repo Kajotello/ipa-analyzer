@@ -29,6 +29,9 @@ def plot_traffic_graph(line_number, date, is_with_delay):
             train_position = scheduled_time_position_data[train_name]
             plt.plot(*zip(*train_position), color='black')
     plt.xlim(left=selected_date_begin, right=selected_date_end)
+    plt.title(f'Wykres ruchu pociągów na linii kolejowej nr {line_number}')
+    plt.xlabel(f'Data i godzina')
+    plt.ylabel('Pożenie (km. linii)')
 
 
 def prepare_data(trains_full_data, line_data, date):
@@ -72,7 +75,7 @@ def plot_posts(line_data, selected_date_begin):
 
 
 def main():
-    plot_traffic_graph('354', '2020-11-11', False)
+    plot_traffic_graph('271', '2020-11-11', False)
     plt.show()
 
 
